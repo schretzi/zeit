@@ -84,8 +84,8 @@ func initConfig() {
 	viper.BindEnv("db")
 
 	if err := viper.ReadInConfig(); err != nil {
-		fmt.Printf("Error in Reading Configuration: %v", err)
-		os.Exit(1)
+		// Set default values for parameters
+		viper.Set("debug", false)
 	}
 
 	if viper.GetBool("debug") {
