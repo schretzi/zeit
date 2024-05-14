@@ -61,7 +61,7 @@ var entryCmd = &cobra.Command{
 		}
 
 		fmt.Printf("%s %s\n", CharInfo, entry.GetOutput(true))
-		return
+
 	},
 }
 
@@ -74,10 +74,4 @@ func init() {
 	entryCmd.Flags().StringVarP(&task, "task", "t", "", "Update activity task")
 	entryCmd.Flags().BoolVar(&fractional, "decimal", false, "Show fractional hours in decimal format instead of minutes")
 
-	var err error
-	database, err = InitDatabase()
-	if err != nil {
-		fmt.Printf("%s %+v\n", CharError, err)
-		os.Exit(1)
-	}
 }
