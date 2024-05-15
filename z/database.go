@@ -33,13 +33,12 @@ func InitDatabase() (*Database, error) {
 
 	database := Database{db}
 	return &database, nil
-
 }
 
 func (database *Database) NewID() string {
 	id, err := uuid.NewRandom()
 	if err != nil {
-		log.Fatalln("could not generate UUID: %+v", err)
+		log.Fatalf("could not generate UUID: %+v", err)
 	}
 	return id.String()
 }
@@ -53,13 +52,13 @@ func (database *Database) AddEntry(user string, entry Entry, setRunning bool) (s
 	}
 
 	dberr := database.DB.Update(func(tx *buntdb.Tx) error {
-		if setRunning == true {
-			_, _, seterr := tx.Set(user+":status:running", id, nil)
+		if setRunning {
+			_, _, seterr := tx.Set(user+TextStatusRunning, id, nil)
 			if seterr != nil {
 				return seterr
 			}
 		}
-		_, _, seterr := tx.Set(user+":entry:"+id, string(entryJson), nil)
+		_, _, seterr := tx.Set(user+TextEntry+id, string(entryJson), nil)
 		if seterr != nil {
 			return seterr
 		}
@@ -74,7 +73,7 @@ func (database *Database) GetEntry(user string, entryId string) (Entry, error) {
 	var entry Entry
 
 	dberr := database.DB.View(func(tx *buntdb.Tx) error {
-		value, err := tx.Get(user + ":entry:" + entryId)
+		value, err := tx.Get(user + TextEntry + entryId)
 		if err != nil {
 			return err
 		}
@@ -94,7 +93,7 @@ func (database *Database) UpdateEntry(user string, entry Entry) (string, error) 
 	}
 
 	dberr := database.DB.Update(func(tx *buntdb.Tx) error {
-		_, _, seerr := tx.Set(user+":entry:"+entry.ID, string(entryJson), nil)
+		_, _, seerr := tx.Set(user+TextEntry+entry.ID, string(entryJson), nil)
 		if seerr != nil {
 			return seerr
 		}
@@ -112,21 +111,21 @@ func (database *Database) FinishEntry(user string, entry Entry) (string, error) 
 	}
 
 	dberr := database.DB.Update(func(tx *buntdb.Tx) error {
-		runningEntryId, grerr := tx.Get(user + ":status:running")
+		runningEntryId, grerr := tx.Get(user + TextStatusRunning)
 		if grerr != nil {
-			return errors.New("no currently running entry found!")
+			return errors.New("no currently running entry found")
 		}
 
 		if runningEntryId != entry.ID {
-			return errors.New("specified entry is not currently running!")
+			return errors.New("specified entry is not currently running")
 		}
 
-		_, _, srerr := tx.Set(user+":status:running", "", nil)
+		_, _, srerr := tx.Set(user+TextStatusRunning, "", nil)
 		if srerr != nil {
 			return srerr
 		}
 
-		_, _, seerr := tx.Set(user+":entry:"+entry.ID, string(entryJson), nil)
+		_, _, seerr := tx.Set(user+TextEntry+entry.ID, string(entryJson), nil)
 		if seerr != nil {
 			return seerr
 		}
@@ -145,13 +144,13 @@ func (database *Database) EraseEntry(user string, id string) error {
 
 	dberr := database.DB.Update(func(tx *buntdb.Tx) error {
 		if runningEntryId == id {
-			_, _, seterr := tx.Set(user+":status:running", "", nil)
+			_, _, seterr := tx.Set(user+TextStatusRunning, "", nil)
 			if seterr != nil {
 				return seterr
 			}
 		}
 
-		_, delerr := tx.Delete(user + ":entry:" + id)
+		_, delerr := tx.Delete(user + TextEntry + id)
 		if delerr != nil {
 			return delerr
 		}
@@ -166,7 +165,7 @@ func (database *Database) GetRunningEntryId(user string) (string, error) {
 	var runningId string = ""
 
 	dberr := database.DB.View(func(tx *buntdb.Tx) error {
-		value, err := tx.Get(user + ":status:running")
+		value, err := tx.Get(user + TextStatusRunning)
 		if errors.Is(err, buntdb.ErrNotFound) {
 			return nil
 		}
@@ -184,7 +183,7 @@ func (database *Database) ListEntries(user string) ([]Entry, error) {
 	var entries []Entry
 
 	dberr := database.DB.View(func(tx *buntdb.Tx) error {
-		tx.AscendKeys(user+":entry:*", func(key, value string) bool {
+		tx.AscendKeys(user+TextEntry+"*", func(key, value string) bool {
 			var entry Entry
 			json.Unmarshal([]byte(value), &entry)
 
@@ -205,7 +204,7 @@ func (database *Database) GetImportsSHA1List(user string) (map[string]string, er
 	var sha1List = make(map[string]string)
 
 	dberr := database.DB.View(func(tx *buntdb.Tx) error {
-		value, err := tx.Get(user+":imports:sha1", false)
+		value, err := tx.Get(user+TextImports, false)
 		if err != nil {
 			return nil
 		}
@@ -235,7 +234,7 @@ func (database *Database) UpdateImportsSHA1List(user string, sha1List map[string
 	value := strings.Join(sha1Entries, ",")
 
 	dberr := database.DB.Update(func(tx *buntdb.Tx) error {
-		_, _, seterr := tx.Set(user+":imports:sha1", value, nil)
+		_, _, seterr := tx.Set(user+TextImports, value, nil)
 		if seterr != nil {
 			return seterr
 		}
@@ -255,7 +254,7 @@ func (database *Database) UpdateProject(user string, projectName string, project
 	projectId := GetIdFromName(projectName)
 
 	dberr := database.DB.Update(func(tx *buntdb.Tx) error {
-		_, _, sperr := tx.Set(user+":project:"+projectId, string(projectJson), nil)
+		_, _, sperr := tx.Set(user+TextProject+projectId, string(projectJson), nil)
 		if sperr != nil {
 			return sperr
 		}
@@ -271,7 +270,7 @@ func (database *Database) GetProject(user string, projectName string) (Project, 
 	projectId := GetIdFromName(projectName)
 
 	dberr := database.DB.View(func(tx *buntdb.Tx) error {
-		value, err := tx.Get(user+":project:"+projectId, false)
+		value, err := tx.Get(user+TextProject+projectId, false)
 		if err != nil {
 			return nil
 		}
@@ -293,7 +292,7 @@ func (database *Database) UpdateTask(user string, taskName string, task Task) er
 	taskId := GetIdFromName(taskName)
 
 	dberr := database.DB.Update(func(tx *buntdb.Tx) error {
-		_, _, sperr := tx.Set(user+":task:"+taskId, string(taskJson), nil)
+		_, _, sperr := tx.Set(user+TextTask+taskId, string(taskJson), nil)
 		if sperr != nil {
 			return sperr
 		}
@@ -309,7 +308,7 @@ func (database *Database) GetTask(user string, taskName string) (Task, error) {
 	taskId := GetIdFromName(taskName)
 
 	dberr := database.DB.View(func(tx *buntdb.Tx) error {
-		value, err := tx.Get(user+":task:"+taskId, false)
+		value, err := tx.Get(user+TextTask+taskId, false)
 		if err != nil {
 			return nil
 		}

@@ -39,12 +39,11 @@ var taskCmd = &cobra.Command{
 		}
 
 		fmt.Printf("%s task updated\n", CharInfo)
-		return
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(taskCmd)
-	taskCmd.Flags().StringVarP(&taskGitRepository, "git", "g", "-", "Set the task's Git repository to enable commit message importing into activity notes.\nSet to an empty string '' to remove a previously set repository and disable git log imports.")
 
+	taskCmd.Flags().StringVarP(&taskGitRepository, "git", "g", "-", "Set the task's Git repository to enable commit message importing into activity notes.\nSet to an empty string '' to remove a previously set repository and disable git log imports.")
 }

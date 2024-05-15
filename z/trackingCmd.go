@@ -2,7 +2,7 @@ package z
 
 import (
 	"fmt"
-	"os"
+	"log"
 
 	"github.com/spf13/cobra"
 )
@@ -16,27 +16,22 @@ var trackingCmd = &cobra.Command{
 
 		runningEntryId, err := database.GetRunningEntryId(user)
 		if err != nil {
-			fmt.Printf("%s %+v\n", CharError, err)
-			os.Exit(1)
+			log.Fatalf(ErrorString, CharError, err)
 		}
 
 		if runningEntryId == "" {
-			fmt.Printf("%s not running\n", CharFinish)
-			os.Exit(1)
+			log.Fatalf("%s not running\n", CharFinish)
 		}
 
 		runningEntry, err := database.GetEntry(user, runningEntryId)
 		if err != nil {
-			fmt.Printf("%s %+v\n", CharError, err)
-			os.Exit(1)
+			log.Fatalf(ErrorString, CharError, err)
 		}
 
-		fmt.Printf(runningEntry.GetOutputForTrack(true, true))
-		return
+		fmt.Print(runningEntry.GetOutputForTrack(true, true))
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(trackingCmd)
-
 }

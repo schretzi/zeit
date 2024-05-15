@@ -2,6 +2,7 @@ package z
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -26,7 +27,7 @@ var format string
 var force bool
 
 var noColors bool
-var Debug bool
+var debug bool
 var cfgFile string
 
 const (
@@ -46,19 +47,20 @@ var rootCmd = &cobra.Command{
 
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Printf("%s %+v\n", CharError, err)
-		os.Exit(-1)
+		log.Fatalf(ErrorString, CharError, err)
 	}
 }
 
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	rootCmd.PersistentFlags().BoolVar(&noColors, "no-colors", false, "Do not use colors in output")
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $XDG_CONFIG_HOME/zeit/zeit.yaml)")
-	rootCmd.PersistentFlags().BoolVarP(&Debug, "debug", "d", false, "Display debugging output in the console. (default: false)")
-	viper.BindPFlag("debug", rootCmd.PersistentFlags().Lookup("debug"))
 
+	rootCmd.PersistentFlags().BoolVar(&noColors, FlagNoColors, false, "Do not use colors in output")
+	viper.BindPFlag(FlagNoColors, rootCmd.PersistentFlags().Lookup(FlagNoColors))
+
+	rootCmd.PersistentFlags().BoolVarP(&debug, FlagDebug, "d", false, "Display debugging output in the console. (default: false)")
+	viper.BindPFlag(FlagDebug, rootCmd.PersistentFlags().Lookup(FlagDebug))
 }
 
 func initConfig() {

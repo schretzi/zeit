@@ -2,7 +2,7 @@ package z
 
 import (
 	"fmt"
-	"os"
+	"log"
 	"time"
 
 	"github.com/jinzhu/now"
@@ -24,8 +24,7 @@ var listCmd = &cobra.Command{
 
 		entries, err := database.ListEntries(user)
 		if err != nil {
-			fmt.Printf("%s %+v\n", CharError, err)
-			os.Exit(1)
+			log.Fatalf(ErrorString, CharError, err)
 		}
 
 		var sinceTime time.Time
@@ -34,27 +33,24 @@ var listCmd = &cobra.Command{
 		if since != "" {
 			sinceTime, err = now.Parse(since)
 			if err != nil {
-				fmt.Printf("%s %+v\n", CharError, err)
-				os.Exit(1)
+				log.Fatalf(ErrorString, CharError, err)
 			}
 		}
 
 		if until != "" {
 			untilTime, err = now.Parse(until)
 			if err != nil {
-				fmt.Printf("%s %+v\n", CharError, err)
-				os.Exit(1)
+				log.Fatalf(ErrorString, CharError, err)
 			}
 		}
 
 		var filteredEntries []Entry
 		filteredEntries, err = GetFilteredEntries(entries, project, task, sinceTime, untilTime)
 		if err != nil {
-			fmt.Printf("%s %+v\n", CharError, err)
-			os.Exit(1)
+			log.Fatalf(ErrorString, CharError, err)
 		}
 
-		if listOnlyProjectsAndTasks == true || listOnlyTasks == true {
+		if listOnlyProjectsAndTasks || listOnlyTasks {
 			var projectsAndTasks = make(map[string]map[string]bool)
 
 			for _, filteredEntry := range filteredEntries {
@@ -69,17 +65,17 @@ var listCmd = &cobra.Command{
 				projectsAndTasks[filteredEntry.Project] = taskMap
 			}
 
-			for project, _ := range projectsAndTasks {
-				if listOnlyProjectsAndTasks == true && listOnlyTasks == false {
+			for project := range projectsAndTasks {
+				if listOnlyProjectsAndTasks && !listOnlyTasks {
 					fmt.Printf("%s %s\n", CharMore, project)
 				}
 
-				for task, _ := range projectsAndTasks[project] {
-					if listOnlyProjectsAndTasks == true && listOnlyTasks == false {
+				for task := range projectsAndTasks[project] {
+					if listOnlyProjectsAndTasks && !listOnlyTasks {
 						fmt.Printf("%*s└── ", 1, " ")
 					}
 
-					if appendProjectIDToTask == true {
+					if appendProjectIDToTask {
 						fmt.Printf("%s [%s]\n", task, project)
 					} else {
 						fmt.Printf("%s\n", task)
@@ -96,15 +92,15 @@ var listCmd = &cobra.Command{
 			fmt.Printf("%s\n", entry.GetOutput(false))
 		}
 
-		if listTotalTime == true {
+		if listTotalTime {
 			fmt.Printf("\nTOTAL: %s H\n\n", fmtHours(totalHours))
 		}
-		return
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(listCmd)
+
 	listCmd.Flags().StringVar(&since, "since", "", "Date/time to start the list from")
 	listCmd.Flags().StringVar(&until, "until", "", "Date/time to list until")
 	listCmd.Flags().StringVarP(&project, "project", "p", "", "Project to be listed")
@@ -114,5 +110,4 @@ func init() {
 	listCmd.Flags().BoolVar(&listOnlyProjectsAndTasks, "only-projects-and-tasks", false, "Only list projects and their tasks, no entries")
 	listCmd.Flags().BoolVar(&listOnlyTasks, "only-tasks", false, "Only list tasks, no projects nor entries")
 	listCmd.Flags().BoolVar(&appendProjectIDToTask, "append-project-id-to-task", false, "Append project ID to tasks in the list")
-
 }

@@ -2,6 +2,7 @@ package z
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"time"
 
@@ -20,19 +21,19 @@ func importTymeJson(user string, file string) ([]Entry, error) {
 		tymeEntrySHA1 := structhash.Sha1(tymeEntry, 1)
 		tymeStart, err := time.Parse("2006-01-02T15:04:05-07:00", tymeEntry.Start)
 		if err != nil {
-			fmt.Printf("%s %+v\n", CharError, err)
+			fmt.Printf(ErrorString, CharError, err)
 			continue
 		}
 
 		tymeEnd, err := time.Parse("2006-01-02T15:04:05-07:00", tymeEntry.End)
 		if err != nil {
-			fmt.Printf("%s %+v\n", CharError, err)
+			fmt.Printf(ErrorString, CharError, err)
 			continue
 		}
 
 		entry, err := NewEntry("", "", "", tymeEntry.Project, tymeEntry.Task, user)
 		if err != nil {
-			fmt.Printf("%s %+v\n", CharError, err)
+			fmt.Printf(ErrorString, CharError, err)
 			continue
 		}
 
@@ -60,14 +61,13 @@ var importCmd = &cobra.Command{
 
 		switch format {
 		case "zeit":
-			// TODO:
+			// TODO: What was your Plan here?
 			fmt.Printf("%s not yet implemented\n", CharError)
 			os.Exit(1)
 		case "tyme":
 			entries, err = importTymeJson(user, args[0])
 			if err != nil {
-				fmt.Printf("%s %+v\n", CharError, err)
-				os.Exit(1)
+				log.Fatalf(ErrorString, CharError, err)
 			}
 		default:
 			fmt.Printf("%s specify an import format; see `zeit import --help` for more info\n", CharError)
@@ -76,8 +76,7 @@ var importCmd = &cobra.Command{
 
 		sha1List, sha1Err := database.GetImportsSHA1List(user)
 		if sha1Err != nil {
-			fmt.Printf("%s %+v\n", CharError, sha1Err)
-			os.Exit(1)
+			log.Fatalf(ErrorString, CharError, err)
 		}
 
 		for _, entry := range entries {
@@ -98,16 +97,12 @@ var importCmd = &cobra.Command{
 
 		err = database.UpdateImportsSHA1List(user, sha1List)
 		if err != nil {
-			fmt.Printf("%s %+v\n", CharError, err)
-			os.Exit(1)
+			log.Fatalf(ErrorString, CharError, err)
 		}
-
-		return
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(importCmd)
 	importCmd.Flags().StringVar(&format, "format", "zeit", "Format to import, possible values: zeit, tyme")
-
 }

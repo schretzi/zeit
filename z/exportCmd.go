@@ -3,14 +3,14 @@ package z
 import (
 	"encoding/json"
 	"fmt"
-	"os"
+	"log"
 	"time"
 
 	"github.com/jinzhu/now"
 	"github.com/spf13/cobra"
 )
 
-func exportZeitJson(user string, entries []Entry) (string, error) {
+func exportZeitJson(entries []Entry) (string, error) {
 	stringified, err := json.Marshal(entries)
 	if err != nil {
 		return "", err
@@ -19,7 +19,7 @@ func exportZeitJson(user string, entries []Entry) (string, error) {
 	return string(stringified), nil
 }
 
-func exportTymeJson(user string, entries []Entry) (string, error) {
+func exportTymeJson(entries []Entry) (string, error) {
 	tyme := Tyme{}
 	err := tyme.FromEntries(entries)
 	if err != nil {
@@ -42,8 +42,7 @@ var exportCmd = &cobra.Command{
 
 		entries, err = database.ListEntries(user)
 		if err != nil {
-			fmt.Printf("%s %+v\n", CharError, err)
-			os.Exit(1)
+			log.Fatalf(ErrorString, CharError, err)
 		}
 
 		var sinceTime time.Time
@@ -52,56 +51,49 @@ var exportCmd = &cobra.Command{
 		if since != "" {
 			sinceTime, err = now.Parse(since)
 			if err != nil {
-				fmt.Printf("%s %+v\n", CharError, err)
-				os.Exit(1)
+				log.Fatalf(ErrorString, CharError, err)
 			}
 		}
 
 		if until != "" {
 			untilTime, err = now.Parse(until)
 			if err != nil {
-				fmt.Printf("%s %+v\n", CharError, err)
-				os.Exit(1)
+				log.Fatalf(ErrorString, CharError, err)
 			}
 		}
 
 		var filteredEntries []Entry
 		filteredEntries, err = GetFilteredEntries(entries, project, task, sinceTime, untilTime)
 		if err != nil {
-			fmt.Printf("%s %+v\n", CharError, err)
-			os.Exit(1)
+			log.Fatalf(ErrorString, CharError, err)
 		}
 
 		var output string = ""
 		switch format {
 		case "zeit":
-			output, err = exportZeitJson(user, filteredEntries)
+			output, err = exportZeitJson(filteredEntries)
 			if err != nil {
-				fmt.Printf("%s %+v\n", CharError, err)
-				os.Exit(1)
+				log.Fatalf(ErrorString, CharError, err)
 			}
 		case "tyme":
-			output, err = exportTymeJson(user, filteredEntries)
+			output, err = exportTymeJson(filteredEntries)
 			if err != nil {
-				fmt.Printf("%s %+v\n", CharError, err)
-				os.Exit(1)
+				log.Fatalf(ErrorString, CharError, err)
 			}
 		default:
-			fmt.Printf("%s specify an export format; see `zeit export --help` for more info\n", CharError)
-			os.Exit(1)
+			log.Fatalf("%s specify an export format; see `zeit export --help` for more info\n", CharError)
 		}
 
 		fmt.Printf("%s\n", output)
-		return
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(exportCmd)
+
 	exportCmd.Flags().StringVar(&format, "format", "zeit", "Format to export, possible values: zeit, tyme")
 	exportCmd.Flags().StringVar(&since, "since", "", "Date/time to start the export from")
 	exportCmd.Flags().StringVar(&until, "until", "", "Date/time to export until")
 	exportCmd.Flags().StringVarP(&project, "project", "p", "", "Project to be exported")
 	exportCmd.Flags().StringVarP(&task, "task", "t", "", "Task to be exported")
-
 }

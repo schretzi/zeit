@@ -45,13 +45,11 @@ var statsCmd = &cobra.Command{
 		}
 		fmt.Printf("%s\n\n\n", OutputAppendRight(thisWeek, previousWeek, 16))
 		fmt.Printf("%s\n", cal.GetOutputForDistribution())
-
-		return
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(statsCmd)
-	statsCmd.Flags().BoolVar(&fractional, "decimal", false, "Show fractional hours in decimal format instead of minutes")
 
+	statsCmd.Flags().BoolVar(&fractional, "decimal", false, "Show fractional hours in decimal format instead of minutes")
 }

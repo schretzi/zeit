@@ -2,7 +2,7 @@ package z
 
 import (
 	"fmt"
-	"os"
+	"log"
 
 	"github.com/gookit/color"
 	"github.com/spf13/cobra"
@@ -19,16 +19,13 @@ var eraseCmd = &cobra.Command{
 
 		err := database.EraseEntry(user, id)
 		if err != nil {
-			fmt.Printf("%s %+v\n", CharError, err)
-			os.Exit(1)
+			log.Fatalf(ErrorString, CharError, err)
 		}
 
 		fmt.Printf("%s erased %s\n", CharInfo, color.FgLightWhite.Render(id))
-		return
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(eraseCmd)
-
 }

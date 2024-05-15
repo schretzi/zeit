@@ -2,7 +2,7 @@ package z
 
 import (
 	"fmt"
-	"os"
+	"log"
 	"strings"
 
 	"github.com/araddon/dateparse"
@@ -20,24 +20,21 @@ var entryCmd = &cobra.Command{
 
 		entry, err := database.GetEntry(user, id)
 		if err != nil {
-			fmt.Printf("%s %+v\n", CharError, err)
-			os.Exit(1)
+			log.Fatalf(ErrorString, CharError, err)
 		}
 
 		if begin != "" || finish != "" || project != "" || notes != "" || task != "" {
 			if begin != "" {
 				entry.Begin, err = dateparse.ParseAny(begin)
 				if err != nil {
-					fmt.Printf("%s %+v\n", CharError, err)
-					os.Exit(1)
+					log.Fatalf(ErrorString, CharError, err)
 				}
 			}
 
 			if finish != "" {
 				entry.Finish, err = dateparse.ParseAny(finish)
 				if err != nil {
-					fmt.Printf("%s %+v\n", CharError, err)
-					os.Exit(1)
+					log.Fatalf(ErrorString, CharError, err)
 				}
 			}
 
@@ -55,23 +52,21 @@ var entryCmd = &cobra.Command{
 
 			_, err = database.UpdateEntry(user, entry)
 			if err != nil {
-				fmt.Printf("%s %+v\n", CharError, err)
-				os.Exit(1)
+				log.Fatalf(ErrorString, CharError, err)
 			}
 		}
 
 		fmt.Printf("%s %s\n", CharInfo, entry.GetOutput(true))
-
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(entryCmd)
+
 	entryCmd.Flags().StringVarP(&begin, "begin", "b", "", "Update date/time the activity began at")
 	entryCmd.Flags().StringVarP(&finish, "finish", "s", "", "Update date/time the activity finished at")
 	entryCmd.Flags().StringVarP(&project, "project", "p", "", "Update activity project")
 	entryCmd.Flags().StringVarP(&notes, "notes", "n", "", "Update activity notes")
 	entryCmd.Flags().StringVarP(&task, "task", "t", "", "Update activity task")
 	entryCmd.Flags().BoolVar(&fractional, "decimal", false, "Show fractional hours in decimal format instead of minutes")
-
 }

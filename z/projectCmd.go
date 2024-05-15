@@ -39,12 +39,11 @@ var projectCmd = &cobra.Command{
 		}
 
 		fmt.Printf("%s project updated\n", CharInfo)
-		return
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(projectCmd)
-	projectCmd.Flags().StringVarP(&projectColor, "color", "c", "", "Set the color of the project (hex code, e.g. #121212)")
 
+	projectCmd.Flags().StringVarP(&projectColor, "color", "c", "", "Set the color of the project (hex code, e.g. #121212)")
 }
