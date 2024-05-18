@@ -24,14 +24,14 @@ var entryCmd = &cobra.Command{
 
 		if begin != "" || finish != "" || project != "" || notes != "" || task != "" {
 			if begin != "" {
-				_, err = entry.SetBeginFromString(begin)
+				_, err = entry.SetBeginFromString(begin, entry.Begin)
 				if err != nil {
 					log.Fatalf(ErrorString, CharError, err)
 				}
 			}
 
 			if finish != "" {
-				_, err = entry.SetBeginFromString(finish)
+				_, err = entry.SetFinishFromString(finish, entry.Finish)
 				if err != nil {
 					log.Fatalf(ErrorString, CharError, err)
 				}
