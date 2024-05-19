@@ -2,7 +2,6 @@ package z
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/shopspring/decimal"
 	"github.com/spf13/cobra"
@@ -18,56 +17,7 @@ var listCmd = &cobra.Command{
 	Short: "List activities",
 	Long:  "List all tracked activities.",
 	Run: func(cmd *cobra.Command, args []string) {
-		user := GetCurrentUser()
-
-		entries, err := database.ListEntries(user)
-		if err != nil {
-			log.Fatalf(ErrorString, CharError, err)
-		}
-
-		sinceTime, untilTime := PasteSinceUntil(since, until, listRange)
-
-		var filteredEntries []Entry
-		filteredEntries, err = GetFilteredEntries(entries, project, task, sinceTime, untilTime)
-		if err != nil {
-			log.Fatalf(ErrorString, CharError, err)
-		}
-
-		if listOnlyProjectsAndTasks || listOnlyTasks {
-			var projectsAndTasks = make(map[string]map[string]bool)
-
-			for _, filteredEntry := range filteredEntries {
-				taskMap, ok := projectsAndTasks[filteredEntry.Project]
-
-				if !ok {
-					taskMap = make(map[string]bool)
-					projectsAndTasks[filteredEntry.Project] = taskMap
-				}
-
-				taskMap[filteredEntry.Task] = true
-				projectsAndTasks[filteredEntry.Project] = taskMap
-			}
-
-			for project := range projectsAndTasks {
-				if listOnlyProjectsAndTasks && !listOnlyTasks {
-					fmt.Printf("%s %s\n", CharMore, project)
-				}
-
-				for task := range projectsAndTasks[project] {
-					if listOnlyProjectsAndTasks && !listOnlyTasks {
-						fmt.Printf("%*s└── ", 1, " ")
-					}
-
-					if appendProjectIDToTask {
-						fmt.Printf("%s [%s]\n", task, project)
-					} else {
-						fmt.Printf("%s\n", task)
-					}
-				}
-			}
-
-			return
-		}
+		filteredEntries := listEntries()
 
 		totalHours := decimal.NewFromInt(0)
 		for _, entry := range filteredEntries {
@@ -94,4 +44,12 @@ func init() {
 	listCmd.Flags().BoolVar(&listOnlyProjectsAndTasks, "only-projects-and-tasks", false, "Only list projects and their tasks, no entries")
 	listCmd.Flags().BoolVar(&listOnlyTasks, "only-tasks", false, "Only list tasks, no projects nor entries")
 	listCmd.Flags().BoolVar(&appendProjectIDToTask, "append-project-id-to-task", false, "Append project ID to tasks in the list")
+
+	flagName := "task"
+	listCmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		user := GetCurrentUser()
+		entries, _ := database.ListEntries(user)
+		_, tasks := listProjectsAndTasks(entries)
+		return tasks, cobra.ShellCompDirectiveDefault
+	})
 }

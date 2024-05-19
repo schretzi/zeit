@@ -26,4 +26,12 @@ func init() {
 	switchCmd.Flags().StringVarP(&project, "project", "p", "", "Project to be assigned")
 	switchCmd.Flags().StringVarP(&task, "task", "t", "", "Task to be assigned")
 	switchCmd.Flags().StringVarP(&notes, "notes", "n", "", "Activity notes")
+
+	flagName := "task"
+	switchCmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		user := GetCurrentUser()
+		entries, _ := database.ListEntries(user)
+		_, tasks := listProjectsAndTasks(entries)
+		return tasks, cobra.ShellCompDirectiveDefault
+	})
 }
