@@ -23,7 +23,4 @@ func init() {
 	rootCmd.AddCommand(switchBackCmd)
 
 	switchBackCmd.Flags().StringVarP(&switchString, "begin", "b", "", "Time the new activity should begin at and the old one ends\n\nEither in the formats 16:00 / 4:00PM \nor relative to the current time, \ne.g. -0:15 (now minus 15 minutes), +1.50 (now plus 1:30h).")
-	switchBackCmd.Flags().StringVarP(&project, "project", "p", "", "Project to be assigned")
-	switchBackCmd.Flags().StringVarP(&task, "task", "t", "", "Task to be assigned")
-	switchBackCmd.Flags().StringVarP(&notes, "notes", "n", "", "Activity notes")
 }
