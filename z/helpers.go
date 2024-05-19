@@ -181,7 +181,7 @@ func GetGitLog(repo string, since time.Time, until time.Time) (string, string, e
 	return stdoutStr, stderrStr, nil
 }
 
-func PasteSinceUntil(since string, until string, listRange string) (time.Time, time.Time) {
+func ParseSinceUntil(since string, until string, listRange string) (time.Time, time.Time) {
 
 	var sinceTime time.Time
 	var untilTime time.Time

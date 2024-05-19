@@ -43,7 +43,7 @@ var exportCmd = &cobra.Command{
 			log.Fatalf(ErrorString, CharError, err)
 		}
 
-		sinceTime, untilTime := PasteSinceUntil(since, until, listRange)
+		sinceTime, untilTime := ParseSinceUntil(since, until, listRange)
 
 		var filteredEntries []Entry
 		filteredEntries, err = GetFilteredEntries(entries, project, task, sinceTime, untilTime)
