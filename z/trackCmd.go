@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var trackCmd = &cobra.Command{
@@ -21,6 +22,18 @@ var trackCmd = &cobra.Command{
 
 		if runningEntryId != "" {
 			log.Fatalf("%s a task is already running\n", CharTrack)
+		}
+
+		if project == "" && viper.GetString("project.default") != "" {
+			project = viper.GetString("project.default")
+		}
+
+		if project == "" && viper.GetBool("project.mandatory") {
+			log.Fatal("project is mandatory but missing")
+		}
+
+		if task == "" && viper.GetBool("task.mandatory") {
+			log.Fatal("task is mandatory but missing")
 		}
 
 		newEntry, err := NewEntry("", begin, finish, project, task, user)
