@@ -1,11 +1,6 @@
 package z
 
 import (
-	"fmt"
-	"log"
-	"os"
-	"time"
-
 	"github.com/spf13/cobra"
 )
 
@@ -14,80 +9,7 @@ var finishCmd = &cobra.Command{
 	Short: "Finish currently running activity",
 	Long:  "Finishing tracking of currently running activity.",
 	Run: func(cmd *cobra.Command, args []string) {
-		user := GetCurrentUser()
-
-		runningEntryId, err := database.GetRunningEntryId(user)
-		if err != nil {
-			log.Fatalf(ErrorString, CharError, err)
-		}
-
-		if runningEntryId == "" {
-			log.Fatalf(ErrorString, CharError, err)
-		}
-
-		runningEntry, err := database.GetEntry(user, runningEntryId)
-		if err != nil {
-			log.Fatalf(ErrorString, CharError, err)
-		}
-
-		tmpEntry, err := NewEntry(runningEntry.ID, begin, finish, project, task, user)
-		if err != nil {
-			log.Fatalf(ErrorString, CharError, err)
-		}
-
-		if begin != "" {
-			runningEntry.Begin = tmpEntry.Begin
-		}
-
-		if finish != "" {
-			runningEntry.Finish = tmpEntry.Finish
-		} else {
-			runningEntry.Finish = time.Now()
-		}
-
-		if project != "" {
-			runningEntry.Project = tmpEntry.Project
-		}
-
-		if task != "" {
-			runningEntry.Task = tmpEntry.Task
-		}
-
-		if notes != "" {
-			runningEntry.Notes = fmt.Sprintf("%s\n%s", runningEntry.Notes, notes)
-		}
-
-		if runningEntry.Task != "" {
-			task, err := database.GetTask(user, runningEntry.Task)
-			if err != nil {
-				log.Fatalf(ErrorString, CharError, err)
-			}
-
-			if task.GitRepository != "" && task.GitRepository != "-" {
-				stdout, stderr, err := GetGitLog(task.GitRepository, runningEntry.Begin, runningEntry.Finish)
-				if err != nil {
-					log.Fatalf(ErrorString, CharError, err)
-				}
-
-				if stderr == "" {
-					runningEntry.Notes = fmt.Sprintf("%s\n%s", runningEntry.Notes, stdout)
-				} else {
-					fmt.Printf("%s notes were not imported: %+v\n", CharError, stderr)
-				}
-			}
-		}
-
-		if !runningEntry.IsFinishedAfterBegan() {
-			fmt.Printf("%s %+v\n", CharError, "beginning time of tracking cannot be after finish time")
-			os.Exit(1)
-		}
-
-		_, err = database.FinishEntry(user, runningEntry)
-		if err != nil {
-			log.Fatalf(ErrorString, CharError, err)
-		}
-
-		fmt.Print(runningEntry.GetOutputForFinish())
+		finishTask(FinishWithMetadata)
 	},
 }
 

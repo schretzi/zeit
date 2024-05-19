@@ -17,13 +17,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-const (
-	TFAbsTwelveHour     int = 0
-	TFAbsTwentyfourHour int = 1
-	TFRelHourMinute     int = 2
-	TFRelHourFraction   int = 3
-)
-
 func TimeFormats() []string {
 	return []string{
 		`^\d{1,2}:\d{1,2}(am|pm)$`,     // Absolute twelve hour format
