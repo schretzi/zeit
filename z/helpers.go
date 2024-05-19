@@ -3,6 +3,7 @@ package z
 import (
 	"bytes"
 	"errors"
+	"log"
 	"math"
 	"os/exec"
 	"os/user"
@@ -12,6 +13,8 @@ import (
 	"time"
 
 	"github.com/araddon/dateparse"
+	"github.com/jinzhu/now"
+	"github.com/spf13/viper"
 )
 
 const (
@@ -183,4 +186,64 @@ func GetGitLog(repo string, since time.Time, until time.Time) (string, string, e
 
 	stdoutStr, stderrStr := stdout.String(), stderr.String()
 	return stdoutStr, stderrStr, nil
+}
+
+func PasteSinceUntil(since string, until string, listRange string) (time.Time, time.Time) {
+
+	var sinceTime time.Time
+	var untilTime time.Time
+	var err error
+
+	if since != "" {
+		sinceTime, err = now.Parse(since)
+		if err != nil {
+			log.Fatalf(ErrorString, CharError, err)
+		}
+	}
+
+	if until != "" {
+		untilTime, err = now.Parse(until)
+		if err != nil {
+			log.Fatalf(ErrorString, CharError, err)
+		}
+	}
+
+	if listRange != "" {
+		if since != "" || until != "" {
+			log.Fatal("Range and since/until can't be used together, select one of them")
+		}
+
+		if viper.GetBool("firstWeekDayMonday") {
+			now.WeekStartDay = time.Monday
+		}
+
+		loc, _ := time.LoadLocation("Local")
+		time.Local = loc
+		switch listRange {
+		case "today":
+			sinceTime = now.BeginningOfDay()
+			untilTime = now.EndOfDay()
+		case "yesterday":
+			sinceTime = now.BeginningOfDay().AddDate(0, 0, -1)
+			untilTime = now.EndOfDay().AddDate(0, 0, -1)
+		case "thisWeek":
+			sinceTime = now.BeginningOfWeek()
+			untilTime = now.EndOfWeek()
+		case "lastWeek":
+			lastWeekDay := time.Now().AddDate(0, 0, -7)
+			sinceTime = now.With(lastWeekDay).BeginningOfWeek()
+			untilTime = now.With(lastWeekDay).EndOfWeek()
+		case "thisMonth":
+			sinceTime = now.BeginningOfMonth()
+			untilTime = now.EndOfMonth()
+		case "lastMonth":
+			lastMonthDay := time.Now().AddDate(0, -1, 0)
+			sinceTime = now.With(lastMonthDay).BeginningOfMonth()
+			untilTime = now.With(lastMonthDay).EndOfMonth()
+		default:
+			log.Fatal("unkown range selection: (today, yesterday, thisWeek, lastWeek, thisMonth, lastMonth)")
+		}
+	}
+
+	return sinceTime, untilTime
 }

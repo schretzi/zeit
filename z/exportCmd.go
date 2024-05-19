@@ -4,9 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"time"
 
-	"github.com/jinzhu/now"
 	"github.com/spf13/cobra"
 )
 
@@ -45,22 +43,7 @@ var exportCmd = &cobra.Command{
 			log.Fatalf(ErrorString, CharError, err)
 		}
 
-		var sinceTime time.Time
-		var untilTime time.Time
-
-		if since != "" {
-			sinceTime, err = now.Parse(since)
-			if err != nil {
-				log.Fatalf(ErrorString, CharError, err)
-			}
-		}
-
-		if until != "" {
-			untilTime, err = now.Parse(until)
-			if err != nil {
-				log.Fatalf(ErrorString, CharError, err)
-			}
-		}
+		sinceTime, untilTime := PasteSinceUntil(since, until, listRange)
 
 		var filteredEntries []Entry
 		filteredEntries, err = GetFilteredEntries(entries, project, task, sinceTime, untilTime)
