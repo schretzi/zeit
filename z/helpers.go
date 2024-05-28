@@ -183,8 +183,6 @@ func GetGitLog(repo string, since time.Time, until time.Time) (string, string, e
 
 func ParseSinceUntil(since string, until string, listRange string) (time.Time, time.Time) {
 
-	var sinceTime time.Time
-	var untilTime time.Time
 	var err error
 
 	if since != "" {

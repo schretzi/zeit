@@ -3,6 +3,7 @@ package z
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -24,6 +25,8 @@ var notes string
 var since string
 var until string
 var listRange string
+var sinceTime time.Time
+var untilTime time.Time
 
 var format string
 var force bool
