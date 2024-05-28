@@ -29,3 +29,7 @@ const (
 	FinishWithMetadata int = 0
 	FinishOnlyTime     int = 1
 )
+
+const RunningFlag string = " RUNNING "
+
+const ColDuration = "Duration"

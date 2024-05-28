@@ -55,7 +55,7 @@ var reportCmd = &cobra.Command{
 		// Group and Order by Day
 		groupedDay := df.GroupBy("Day")
 
-		daySum := groupedDay.Aggregation(aggregate, []string{"Duration", "Duration"})
+		daySum := groupedDay.Aggregation(aggregate, []string{ColDuration, ColDuration})
 
 		dayKeys := maps.Keys(groupedDay.GetGroups())
 		sort.Strings(dayKeys)
@@ -69,14 +69,14 @@ var reportCmd = &cobra.Command{
 			durDay = durDay.Round(time.Minute)
 			if durMin[0] < 0 {
 				durDay = durDay + time.Second
-				fmt.Println("\n", dayKey, ": ", fmtDuration(durDay), " RUNNING ")
+				fmt.Println("\n", dayKey, ": ", fmtDuration(durDay), RunningFlag)
 			} else {
 				fmt.Println("\n", dayKey, ": ", fmtDuration(durDay))
 			}
 			// Group and Sum on Project for this Day
 			filteredProject := df.Filter(dataframe.F{Colname: "Day", Comparator: series.Eq, Comparando: dayKey})
 			groupedProject := filteredProject.GroupBy("Project")
-			projectSum := groupedProject.Aggregation(aggregate, []string{"Duration", "Duration"})
+			projectSum := groupedProject.Aggregation(aggregate, []string{ColDuration, ColDuration})
 			projectKeys := maps.Keys(groupedProject.GetGroups())
 			sort.Strings(projectKeys)
 			for _, projectKey := range projectKeys {
@@ -87,7 +87,7 @@ var reportCmd = &cobra.Command{
 				projectDur = projectDur.Round(time.Minute)
 				if projectDurMin[0] < 0 {
 					projectDur = projectDur + time.Second
-					fmt.Println("    ", projectKey, ": ", fmtDuration(projectDur), " RUNNING ")
+					fmt.Println("    ", projectKey, ": ", fmtDuration(projectDur), RunningFlag)
 				} else {
 					fmt.Println("    ", projectKey, ": ", fmtDuration(projectDur))
 				}
@@ -95,7 +95,7 @@ var reportCmd = &cobra.Command{
 				// Group and Sum on Tasks for that Project on this Day
 				filteredTask := filteredProject.Filter(dataframe.F{Colname: "Project", Comparator: series.Eq, Comparando: projectKey})
 				groupedTask := filteredTask.GroupBy("Task")
-				taskSum := groupedTask.Aggregation(aggregate, []string{"Duration", "Duration"})
+				taskSum := groupedTask.Aggregation(aggregate, []string{ColDuration, ColDuration})
 				taskKeys := maps.Keys(groupedTask.GetGroups())
 				sort.Strings(taskKeys)
 				for _, taskKey := range taskKeys {
@@ -106,7 +106,7 @@ var reportCmd = &cobra.Command{
 					taskDur = taskDur.Round(time.Minute)
 					if taskDurMin[0] < 0 {
 						taskDur = taskDur + time.Second
-						fmt.Println("        ", taskKey, ": ", fmtDuration(taskDur), " RUNNING ")
+						fmt.Println("        ", taskKey, ": ", fmtDuration(taskDur), RunningFlag)
 					} else {
 						fmt.Println("        ", taskKey, ": ", fmtDuration(taskDur))
 					}
