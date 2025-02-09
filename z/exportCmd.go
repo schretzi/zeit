@@ -86,7 +86,7 @@ func init() {
   exportCmd.Flags().StringVarP(&task, "task", "t", "", "Task to be exported")
 
   flagName := "task"
-  entryCmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+  exportCmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
     user := GetCurrentUser()
     entries, _ := database.ListEntries(user)
     _, tasks := listProjectsAndTasks(entries)

@@ -47,7 +47,7 @@ func init() {
   listCmd.Flags().BoolVar(&appendProjectIDToTask, "append-project-id-to-task", false, "Append project ID to tasks in the list")
 
   flagName := "task"
-  entryCmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+  listCmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
     user := GetCurrentUser()
     entries, _ := database.ListEntries(user)
     _, tasks := listProjectsAndTasks(entries)

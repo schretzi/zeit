@@ -72,7 +72,7 @@ func init() {
   trackCmd.Flags().BoolVarP(&force, "force", "f", false, "Force begin tracking of a new task \neven though another one is still running \n(ONLY IF YOU KNOW WHAT YOU'RE DOING!)")
 
   flagName := "task"
-  entryCmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+  trackCmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
     user := GetCurrentUser()
     entries, _ := database.ListEntries(user)
     _, tasks := listProjectsAndTasks(entries)

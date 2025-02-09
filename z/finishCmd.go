@@ -22,7 +22,7 @@ func init() {
   finishCmd.Flags().StringVarP(&task, "task", "t", "", "Task to be assigned")
 
   flagName := "task"
-  entryCmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+  finishCmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
     user := GetCurrentUser()
     entries, _ := database.ListEntries(user)
     _, tasks := listProjectsAndTasks(entries)
