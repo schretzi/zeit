@@ -6,12 +6,14 @@ import (
   "github.com/spf13/viper"
   "github.com/gookit/color"
   "os"
+  "time"
 )
 
 var database *Database
 
 var begin string
 var finish string
+var switchString string
 var project string
 var task string
 var notes string
@@ -19,6 +21,8 @@ var notes string
 var since string
 var until string
 var listRange string
+var sinceTime time.Time
+var untilTime time.Time
 
 var format string
 var force bool
