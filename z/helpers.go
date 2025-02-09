@@ -81,7 +81,7 @@ func RelToTime(timeStr string, ftId int, contextTime time.Time) (time.Time, erro
 
     var t time.Time
 
-    if viper.IsSet("time.relative") && viper.GetString("time.relative") == "context" {
+    if viper.IsSet("time.relative") && viper.GetString("time.relative") == "context" && !contextTime.IsZero() {
       switch gm[1] {
       case "+":
         t = contextTime.Add(time.Hour * time.Duration(hours) + time.Minute * time.Duration(minutes))
