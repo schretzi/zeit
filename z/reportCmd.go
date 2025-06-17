@@ -28,9 +28,9 @@ type reportLine struct {
 var (
 	weeklyFlag  bool
 	monthlyFlag bool
-	notesFlag   bool
 	noTasksFlag bool
 )
+
 var dailyReport map[string]map[string]map[string]reportLine
 
 var reportCmd = &cobra.Command{
@@ -49,9 +49,6 @@ var reportCmd = &cobra.Command{
 		}
 		if monthlyFlag {
 			viper.Set("report.monthlySum", true)
-		}
-		if notesFlag {
-			viper.Set("report.notes", true)
 		}
 		if noTasksFlag {
 			viper.Set("report.no-tasks", true)
@@ -94,8 +91,9 @@ func init() {
 	reportCmd.Flags().StringVarP(&task, "task", "t", "", "Task to be listed")
 	reportCmd.PersistentFlags().BoolVar(&weeklyFlag, "weekly", false, "Print summary of weekly hours")
 	reportCmd.PersistentFlags().BoolVar(&monthlyFlag, "monthly", false, "Print summary of monthly hours")
-	reportCmd.PersistentFlags().BoolVar(&notesFlag, "notes", false, "Print notes for the task")
 	reportCmd.PersistentFlags().BoolVar(&noTasksFlag, "no-tasks", false, "Print only summary bot no task details")
+	reportCmd.Flags().BoolVar(&showNotesFlag, "notes", false, "Show notes from task")
+	viper.BindPFlag("report.notes", listCmd.Flags().Lookup("showNotesFlag"))
 
 	flagName := "task"
 	reportCmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -189,8 +187,8 @@ func output() {
 					} else {
 						fmt.Println()
 					}
-					if viper.GetBool("report.notes") {
-						for _, note := range dailyReport[dateKey][projectKey][taskKey].Notes[1:] {
+					if showNotesFlag {
+						for _, note := range dailyReport[dateKey][projectKey][taskKey].Notes[0:] {
 							if len(note) > 0 {
 								color.FgLightBlue.Println("                    ", note)
 							}

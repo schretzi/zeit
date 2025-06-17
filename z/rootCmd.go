@@ -32,9 +32,10 @@ var (
 )
 
 var (
-	noColors bool
-	debug    bool
-	cfgFile  string
+	showNotesFlag bool
+	noColors      bool
+	debug         bool
+	cfgFile       string
 )
 
 const (

@@ -161,14 +161,14 @@ func (entry *Entry) GetOutputForFinish() string {
 	return fmt.Sprintf("%s finished tracking task%s\n", CharFinish, outputSuffix)
 }
 
-func (entry *Entry) GetOutput(full bool) string {
+func (entry *Entry) GetOutput(full bool, notes bool) string {
 	var output string = ""
 	var entryFinish time.Time
 	var isRunning string = ""
 
 	if entry.Finish.IsZero() {
 		entryFinish = time.Now()
-		isRunning = "[running]"
+		isRunning = " [running]"
 	} else {
 		entryFinish = entry.Finish
 	}
@@ -176,15 +176,28 @@ func (entry *Entry) GetOutput(full bool) string {
 	trackDiff := entryFinish.Sub(entry.Begin)
 	taskDuration := fmtDuration(trackDiff)
 	if full == false {
-		output = fmt.Sprintf("%s %s on %s from %s to %s (%sh) %s",
-			color.FgGray.Render(entry.ID),
-			color.FgLightWhite.Render(entry.Task),
-			color.FgLightWhite.Render(entry.Project),
-			color.FgLightWhite.Render(entry.Begin.Format("2006-01-02 15:04 -0700")),
-			color.FgLightWhite.Render(entryFinish.Format("2006-01-02 15:04 -0700")),
-			color.FgLightWhite.Render(taskDuration),
-			color.FgLightYellow.Render(isRunning),
-		)
+		if notes == false {
+			output = fmt.Sprintf("%s %s on %s from %s to %s (%sh) %s",
+				color.FgGray.Render(entry.ID),
+				color.FgLightWhite.Render(entry.Task),
+				color.FgLightWhite.Render(entry.Project),
+				color.FgLightWhite.Render(entry.Begin.Format("2006-01-02 15:04 -0700")),
+				color.FgLightWhite.Render(entryFinish.Format("2006-01-02 15:04 -0700")),
+				color.FgLightWhite.Render(taskDuration),
+				color.FgLightYellow.Render(isRunning),
+			)
+		} else {
+			output = fmt.Sprintf("%s %s on %s from %s to %s (%sh)%s: %s",
+				color.FgGray.Render(entry.ID),
+				color.FgLightWhite.Render(entry.Task),
+				color.FgLightWhite.Render(entry.Project),
+				color.FgLightWhite.Render(entry.Begin.Format("2006-01-02 15:04 -0700")),
+				color.FgLightWhite.Render(entryFinish.Format("2006-01-02 15:04 -0700")),
+				color.FgLightWhite.Render(taskDuration),
+				color.FgLightYellow.Render(isRunning),
+				color.FgLightBlue.Render(strings.Replace(entry.Notes, "\n", "\n   ", -1)),
+			)
+		}
 	} else {
 		output = fmt.Sprintf("%s\n   %s on %s\n   %sh from %s to %s %s\n\n   Notes:\n   %s\n",
 			color.FgGray.Render(entry.ID),

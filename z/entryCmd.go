@@ -59,7 +59,7 @@ var entryCmd = &cobra.Command{
 			}
 		}
 
-		fmt.Printf("%s %s\n", CharInfo, entry.GetOutput(true))
+		fmt.Printf("%s %s\n", CharInfo, entry.GetOutput(true, true))
 		return
 	},
 }
