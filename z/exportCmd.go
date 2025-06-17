@@ -93,4 +93,11 @@ func init() {
 		_, tasks := listProjectsAndTasks(entries)
 		return tasks, cobra.ShellCompDirectiveDefault
 	})
+
+	flagName = "range"
+	exportCmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		ranges := Ranges()
+		fmt.Println(ranges)
+		return ranges, cobra.ShellCompDirectiveDefault
+	})
 }
