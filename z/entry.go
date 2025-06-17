@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/gookit/color"
-	"github.com/shopspring/decimal"
 	"github.com/spf13/viper"
 )
 
@@ -134,12 +133,12 @@ func (entry *Entry) GetOutputForTrack(isRunning bool, wasRunning bool) string {
 	return fmt.Sprintf("%s %s task%s\n", CharTrack, outputPrefix, outputSuffix)
 }
 
-func (entry *Entry) GetDuration() decimal.Decimal {
+func (entry *Entry) GetDuration() time.Duration {
 	duration := entry.Finish.Sub(entry.Begin)
 	if duration < 0 {
 		duration = time.Now().Sub(entry.Begin)
 	}
-	return decimal.NewFromFloat(duration.Hours())
+	return duration
 }
 
 func (entry *Entry) GetOutputForFinish() string {

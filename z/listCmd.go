@@ -2,9 +2,9 @@ package z
 
 import (
 	"fmt"
+	"time"
 	"strings"
 
-	"github.com/shopspring/decimal"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -23,9 +23,9 @@ var listCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		filteredEntries := listEntries()
 
-		totalHours := decimal.NewFromInt(0)
+		var totalHours time.Duration = 0
 		for _, entry := range filteredEntries {
-			totalHours = totalHours.Add(entry.GetDuration())
+			totalHours += entry.GetDuration()
 			if showNotesFlag {
 				fmt.Printf("%s\n", entry.GetOutput(false, true))
 			} else {
@@ -34,7 +34,7 @@ var listCmd = &cobra.Command{
 		}
 
 		if listTotalTime == true {
-			fmt.Printf("\nTOTAL: %s H\n\n", fmtHours(totalHours))
+			fmt.Printf("\nTOTAL: %s H\n\n", fmtDuration(totalHours))
 		}
 		return
 	},
